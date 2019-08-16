@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include<limits.h>
+#include<math.h>
 #include "data_structure.h"
+
+
+#define SIZE 100
 
 #include <iostream>
 using namespace std;
@@ -102,7 +106,7 @@ Status InitSLinkList(SLinkListType &SL)
 }
 
 
-// 将一个数组赋值给线性表
+// 将一个数组赋值给静态链表
 Status InsertSLinkList(SLinkListType &SL, RedType D[], int n)
 {	
 	int i, p, q;
@@ -137,9 +141,9 @@ void OutputSLinkList(SLinkListType SL)
 
 
 // 交换两个变量的值
-void swap(KeyType &a, KeyType &b)
+void swap(RedType &a, RedType &b)
 {
-	KeyType temp;
+	RedType temp;
 	temp = a;
 	a = b;
 	b = temp;
@@ -197,7 +201,7 @@ void BInsertSort(SqList &L)
 }
 
 
-// 算法10.x，2-路插入排序
+// 算法10.3，2-路插入排序
 void P2InsertSort(SqList &L)
 {
 	int i, j;
@@ -240,7 +244,7 @@ void P2InsertSort(SqList &L)
 }
 
 
-// 算法10.3，表插入排序
+// 算法10.4，表插入排序
 /* 根据静态链表SL中各结点的指针值调整记录位置，使得SL中记录按关键字 */
 void Arrange(SLinkListType &SL)
 {
@@ -266,7 +270,7 @@ void Arrange(SLinkListType &SL)
 }
 
 
-// 算法10.4，希尔排序
+// 算法10.5，希尔排序
 /* 一趟希尔插入排序算法过程 */
 void ShellInsert(SqList &L, int dk)
 {
@@ -293,6 +297,264 @@ void ShellSort(SqList &L, int dlta[], int t)
 	{
 		ShellInsert(L, dlta[k]);
 	}
+}
+
+
+// 算法10.6，冒泡交换排序
+void BubbleSort(SqList &L)
+{
+	int i, j;
+	for(i = L.length; i > 0; i--)
+	{
+		for(j = 1; j < i; j++)
+		{
+			if(L.r[j].key > L.r[i].key)
+			{
+				swap(L.r[i], L.r[j]);
+			}
+		}
+	}
+}
+
+
+// 算法10.7，快速交换排序
+/* 一趟快速交换排序算法过程 */
+int Partition(SqList &L, int low, int high)
+{
+	L.r[0] = L.r[low];
+	KeyType pivotkey = L.r[low].key;
+	while(low < high)
+	{
+		while(low < high && L.r[high].key >= pivotkey)
+		{
+			high--;
+		}
+		L.r[low] = L.r[high];
+		while(low < high && L.r[low].key <= pivotkey)
+		{
+			low++;
+		}
+		L.r[low] = L.r[high];
+	}
+	L.r[low] = L.r[0];
+	return low;
+}
+
+
+void QSort(SqList &L, int low, int high)
+{
+	int pivotloc;
+	if(low < high)
+	{
+		pivotloc = Partition(L, low, high);
+		QSort(L, low, pivotloc - 1);
+		QSort(L, pivotloc + 1, low);
+	}
+}
+
+
+void QuickSort(SqList &L)
+{
+	QSort(L, 1, L.length);
+}
+
+
+// 算法10.8，简单选择排序
+/* 在L.r[i...L.length]中选择key最小的记录, 返回其下标(位置) */
+int SelectMinKey(SqList L, int i)
+{
+	int j, min = i;
+	KeyType minKey = L.r[i].key;
+	for(j = i + 1; j <= L.length; j++)
+	{
+		if(L.r[j].key < minKey)
+		{
+			min = j;
+			minKey = L.r[j].key;
+		}
+	}
+	return min;
+}
+
+
+void SelectSort(SqList &L)
+{
+	int i, j;
+	for(i = 1; i < L.length; i++)
+	{
+		j = SelectMinKey(L, i);
+		if(i != j)
+		{
+			swap(L.r[i], L.r[j]);
+		}
+	}
+}
+
+
+// 算法10.9，树形选择排序
+void TreeSort(SqList &L)
+{
+	int i,j, j1, k, k1, level;
+	int len = L.length;
+	level = (int)ceil(log(len)/log(2)) + 1; // 完全二叉树的层数
+	k = (int)pow(2, level) - 1; // level层完全二叉树的结点总数
+	k1 = (int)pow(2, level - 1) - 1; // level-1层完全二叉树的结点总数
+	
+	RedType *temp;
+	temp = (RedType*)malloc(k * sizeof(RedType));
+
+	for(i = 1; i <= len; i++) // 将L.r赋给叶子结点
+	{
+		temp[k1 + i -1] = L.r[i];
+	}
+	
+	for(i = k1 + len; i < k; i++) // 给多余的叶子的关键字赋无穷大
+	{
+		temp[i].key = INT_MAX;
+	}
+
+	j1 = k1;
+	j = k;
+	while(j1)
+	{
+		for(i = j1; i < j; i += 2)  // 给非叶子结点赋值
+		{
+			if(temp[i].key < temp[i + 1].key)
+			{
+				temp[(i + 1) / 2 - 1] = temp[i];
+			}
+			else
+			{
+				temp[(i + 1) / 2 - 1] = temp[i + 1];
+			}
+		}
+		j = j1;
+		j1 = (j1 - 1) / 2;
+	}
+	
+	for(i = 0; i < len; i++)
+	{
+		L.r[i + 1] = temp[0];  // 将当前最小值赋给L.r[i]
+		j1 = 0;
+		for(j = 1; j < level; j++) // 沿树根找结点temp[0]在叶子中的序号j1
+		{
+			if(temp[2 * j1 + 1].key == temp[j1].key)
+			{
+				j1 = 2 * j1 + 1;
+			}
+			else 
+			{
+				j1 = 2 * j1 + 2;
+			}
+		}
+		temp[j1].key = INT_MAX;
+		while(j1)
+		{
+			j1 = (j1 + 1) / 2 - 1;  // 序号为j1的结点的双亲结点序号
+			if(temp[2 * j1 + 1].key <= temp[2 * j1 + 2].key)
+			{
+				temp[j1] = temp[2 * j1 +1];
+			}
+			else
+			{
+				temp[j1] = temp[2 * j1 +2];
+			}
+		}
+	}	
+	free(temp);
+}
+
+
+// 算法10.10，堆排序
+/* 已知H.r[s...m]中记录的关键字除H.r[s]外均满足堆的定义，调整H.r[s]关键字使H.r[s...m]成为大顶堆*/
+void HeapAdjust(SqList &H, int s, int m)
+{
+	int j;
+	RedType rc = H.r[s];
+	for(j = 2 * s; j <= m; j *= 2)
+	{
+		if(j < m && (H.r[j].key < H.r[j + 1].key))
+		{
+			j++;
+		}
+		if(rc.key > H.r[j].key)
+		{
+			break;
+		}
+		H.r[s] = H.r[j];
+		s = j;
+	}
+	H.r[s] = rc;
+}
+
+
+void HeapSort(SqList &L)
+{
+	int i;
+	for(i = L.length / 2; i > 0; i--) // 把L.r[1...L.length]建成大顶堆
+	{
+		HeapAdjust(L, i, L.length);
+	}
+
+	for(i = L.length; i > 1; i--)
+	{
+		swap(L.r[1], L.r[i]);
+		HeapAdjust(L, 1, i - 1);
+	}
+}
+
+
+// 算法10.11，归并排序
+/* 一趟归并排序算法过程: 将有序的SR[i...m]和SR[m+1...n]归并为有序的TR[i...n] */
+void Merge(RedType SR[], RedType TR[], int i, int m, int n)
+{
+	int j, k;
+	for(j = m + 1, k = i; i <= m && j <= n; k++) // 将SR中的记录由小到大并入TR
+	{
+		if(SR[i].key < SR[j].key)
+		{
+			TR[k] = SR[i++];
+		}
+		else
+		{
+			TR[k] = SR[j++];
+		}
+	}
+
+	while(i <= m) // 将剩余的SR[i...m]复制到TR
+	{
+		TR[k++] = SR[i++]; 
+	}
+	
+	while(j <= n) // 将剩余的SR[j...n]复制到TR
+	{
+		TR[k++] = SR[j++];
+	}
+}
+
+
+/* 将SR[s...t]归并排序为TR1[s...t] */
+void MSort(RedType SR[], RedType TR1[], int s, int t)
+{
+	int m;
+	RedType TR2[MAXSIZE + 1];
+	if(s == t)
+	{
+		TR1[s] = SR[s];
+	}
+	else
+	{
+		m = (s + t) / 2;
+		MSort(SR, TR2, s, m);     // 递归地将SR[s..m]归并为有序的TR2[s..m]
+		MSort(SR, TR2, m + 1, t); // 递归地将SR[m+1..t]归并为有序的TR2[m+1..t]
+		Merge(TR2, TR1, s, m, t); // 将TR2[s..m]和TR2[m+1..t]归并到TR1[s..t]
+	}
+}
+
+
+void MergeSort(SqList &L)
+{
+	MSort(L.r, L.r, 1, L.length);
 }
 
 
@@ -351,6 +613,60 @@ void test_inner_sort()
 	int dlta[] = {5, 3, 1};
 	int dlta_length = sizeof(dlta)/sizeof(dlta[0]);
 	ShellSort(L, dlta, dlta_length);
+	cout << "排序后数组为：";
+	OutputSqList(L);
+
+	cout << "==============冒泡交换排序================" << endl;
+	InitSqList(L);
+	InsertSqList(L, keys, length);
+	cout << "原数组为：";
+	OutputSqList(L);
+	BubbleSort(L);
+	cout << "排序后数组为：";
+	OutputSqList(L);
+
+	cout << "==============快速交换排序================" << endl;
+	InitSqList(L);
+	InsertSqList(L, keys, length);
+	cout << "原数组为：";
+	OutputSqList(L);
+	QuickSort(L);
+	cout << "排序后数组为：";
+	OutputSqList(L);
+
+	cout << "==============简单选择排序================" << endl;
+	InitSqList(L);
+	InsertSqList(L, keys, length);
+	cout << "原数组为：";
+	OutputSqList(L);
+	SelectSort(L);
+	cout << "排序后数组为：";
+	OutputSqList(L);
+
+	cout << "==============树形选择排序================" << endl;
+	InitSqList(L);
+	InsertSqList(L, keys, length);
+	cout << "原数组为：";
+	OutputSqList(L);
+	TreeSort(L);
+	cout << "排序后数组为：";
+	OutputSqList(L);
+
+	cout << "==============堆排序================" << endl;
+	InitSqList(L);
+	InsertSqList(L, keys, length);
+	cout << "原数组为：";
+	OutputSqList(L);
+	HeapSort(L);
+	cout << "排序后数组为：";
+	OutputSqList(L);
+
+	cout << "==============归并排序================" << endl;
+	InitSqList(L);
+	InsertSqList(L, keys, length);
+	cout << "原数组为：";
+	OutputSqList(L);
+	MergeSort(L);
 	cout << "排序后数组为：";
 	OutputSqList(L);
 }
