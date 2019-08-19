@@ -3,10 +3,12 @@
 
 #include "stdafx.h"
 #include "data_structure.h"
+#include "c_exercise.h"
 
 
 int main(int argc, char* argv[])
 {
 	test_inner_sort();
+	test_c_exercise();
 	return 0;
 }

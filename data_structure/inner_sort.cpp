@@ -4,12 +4,11 @@
 #include "data_structure.h"
 
 
-#define SIZE 100
-
 #include <iostream>
 using namespace std;
 
 
+#define SIZE 100
 #define MAXSIZE 20    // 一个用作示例的小顺序表的最大长度
 typedef int KeyType;  // 定义关键字，类型为整数类型
 typedef int InfoType; // 定义非关键字，类型为整数类型
@@ -34,9 +33,25 @@ typedef struct
 
 typedef struct
 {
-	SLNode *r;		// 0号单元表示头结点
+	SLNode *r;		// r[0]表示头结点
 	int length;		// 链表当前长度
 }SLinkListType;		// 静态链表类型
+
+typedef struct
+{
+	KeyType *keys;					   // 关键字项
+	InfoType otheritems;			   // 其他数据项
+	int next;
+}SLCell;							   // 静态链表的结点类型
+
+typedef struct
+{
+	SLCell *r;							// 静态链表的可利用空间，r[0]为头结点
+	int keynum;							// 记录的当前关键字个数
+	int recnum;							// 静态链表的当前长度
+}SLList;								// 静态链表类型
+
+typedef int ArrType[RADIX];				// 指针数组类型
 
 
 // 线性表初始化
@@ -125,6 +140,7 @@ Status InsertSLinkList(SLinkListType &SL, RedType D[], int n)
 		SL.r[q].next = i + 1;
 	}
 	SL.length = n;
+
 	return OK;
 }
 
@@ -136,6 +152,55 @@ void OutputSLinkList(SLinkListType SL)
 	{
 		cout << SL.r[i].rc.key << "(" << SL.r[i].next << ") ";
 	}
+	cout <<"\n" << endl;
+}
+
+
+// 静态链表初始化(基数排序)
+Status InitSLList(SLList &SLL)
+{	
+	SLL.r = (SLCell*)malloc((MAXSIZE + 1) * sizeof(SLCell));
+	if(!SLL.r)
+	{
+		exit(OVERFLOW);
+	}
+	SLL.r[0].keys = (KeyType*)malloc(MAX_NUM_OF_KEY * sizeof(KeyType));
+	SLL.r[0].next = 1;
+	SLL.keynum = 0;
+	SLL.recnum = 0;
+
+	return OK;
+}
+
+// 将一个数组赋值给静态链表(基数排序)
+Status InsertSLList(SLList &SLL, RedType D[], int n)
+{	
+	int i, unit, ten;  // 优先按照最低排序(取个位和十位)
+	for(i = 0; i < n; i++)
+	{	
+		unit = D[i].key % 10;
+		ten = D[i].key / 10;
+		SLL.r[i + 1].keys = (KeyType*)malloc(MAX_NUM_OF_KEY * sizeof(KeyType));
+		SLL.r[i + 1].keys[0] = unit;
+		SLL.r[i + 1].keys[1] = ten;
+		SLL.r[i + 1].otheritems = D[i].otherinfo;
+		SLL.r[i + 1].next = i + 2;
+	}
+	SLL.r[i].next = 0;  // 最后一个结点的next置为0
+	SLL.keynum = 2;
+	SLL.recnum = n;
+	
+	return OK;
+}
+
+
+// 静态链表输出(基数排序)
+void OutputSLList(SLList SLL)
+{
+	for(int p = SLL.r[0].next; p; p=SLL.r[p].next)
+	{
+		cout << SLL.r[p].keys[1] << SLL.r[p].keys[0] << " ";
+    }
 	cout <<"\n" << endl;
 }
 
@@ -558,6 +623,78 @@ void MergeSort(SqList &L)
 }
 
 
+// 算法10.12，基数排序
+/* 静态链表L的r域中记录已按(keys[0]...keys[i-1])有序。
+   按第i个关键字keys[i]建立RADIX个子表，使同一子表中记录的keys[i]相同。
+   f[0...RADIX-1]和e[0...RADIX-1]分别指向各个子表中第一个和最后一个记录。*/
+void Distribute(SLCell *r, int i, ArrType &f, ArrType &e)
+{
+	int j, p;
+	for(j = 0; j < RADIX; j++)  // 各个子表初始化为空表
+	{
+		f[j] = 0;
+		e[j] = 0;
+	}
+
+	for(p = r[0].next; p; p = r[p].next)
+	{
+		j = r[p].keys[i];   // 将记录中第i个关键字映射到[0...RADIX-1]
+		if(!f[j])
+		{
+			f[j] = p;
+		}
+		else
+		{
+			r[e[j]].next = p;
+		}
+
+		e[j] = p;   // 将p所指的结点插入到第j个子表中
+	}
+
+}
+
+
+/* 按keys[i]自小到大将f[0...RADIX-1]所指各个子表依次连接成一个链表，
+   e[0...RADIX-1]为各个子表的尾指针。*/
+void Collect(SLCell *r, int i, ArrType f, ArrType e)
+{
+	int j;
+	for(j = 0; !f[j]; j++)  // 找到第一个非空子表
+	{
+		;
+	}
+	
+	r[0].next = f[j];  // r[0].next指向第一个非空子表中第一个结点
+	int t = e[j];
+	while(j < RADIX)
+	{
+		for(j++; !f[j]; j++)  // 找到下一个非空子表
+		{
+			;
+		}
+		if(j < RADIX && f[j])  // 链接两个非空子表
+		{
+			r[t].next = f[j];
+			t = e[j];
+		}
+
+		r[t].next = 0;   // t指向最后一个非空子表中的最后一个结点
+	}
+}
+
+
+void RadixSort(SLList &L)
+{
+	int i, p;
+	ArrType f, e;
+	for(i = 0; i < L.keynum; i++)  // 将最低位优先依次对各个关键字进行分配和收集
+	{
+		Distribute(L.r, i, f, e);  // 第i趟分配
+		Collect(L.r, i, f, e);	   // 第i趟收集
+	}
+}
+
+
 // 测试函数
 void test_inner_sort()
 {
@@ -669,4 +806,16 @@ void test_inner_sort()
 	MergeSort(L);
 	cout << "排序后数组为：";
 	OutputSqList(L);
+
+	cout << "==============基数排序================" << endl;
+	SLList SLL;
+	InitSLList(SLL);
+	RedType SD[] = {{21, 1}, {20, 2}, {19, 3}, {18, 4}, {17, 5}, {16, 6}, {15, 7}, {14, 8}, {13, 9}, {12, 10}};
+	int sd_length = sizeof(SD)/sizeof(SD[0]);
+	InsertSLList(SLL, SD, sd_length);
+	cout << "原数组为：";
+	OutputSLList(SLL);
+	RadixSort(SLL);
+	cout << "排序后数组为：";
+	OutputSLList(SLL);
 }
