@@ -97,6 +97,10 @@ SOURCE=.\inner_sort.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\linear_list.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File

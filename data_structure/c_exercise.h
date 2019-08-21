@@ -1,1 +1,1 @@
-void test_c_exercise();
+void TestCExercise();

@@ -8,7 +8,8 @@
 
 int main(int argc, char* argv[])
 {
-	test_inner_sort();
-	test_c_exercise();
+	// TestInnerSort();
+	// TestCExercise();
+	TestLinearList();
 	return 0;
 }

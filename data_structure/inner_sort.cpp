@@ -696,7 +696,7 @@ void RadixSort(SLList &L)
 
 
 // 测试函数
-void test_inner_sort()
+void TestInnerSort()
 {
 	cout << "==============内部排序演示================\n" << endl;
 	SqList L;

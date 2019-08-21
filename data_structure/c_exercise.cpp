@@ -21,7 +21,7 @@ float get_pi()
 
 
 // 测试函数
-void test_c_exercise()
+void TestCExercise()
 {
 	cout << "==============C语言经典问题汇集演示================\n" << endl;
 	float pi = get_pi();

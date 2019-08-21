@@ -8,6 +8,9 @@
 typedef int Status;
 
 #define SIZE 100
+#define LIST_INIT_SIZE 100  // 线性表存储空间的初始分配量
+#define LISTINCREMENT  10   // 线性表存储空间的分配增量
+		
 
 #define MAXSIZE 20         // 一个用作示例的小顺序表的最大长度
 #define MAX_NUM_OF_KEY 10  // 关键字项数的最大值
@@ -15,5 +18,8 @@ typedef int Status;
 #define MAX_SPACE  10000   
 
 
+// 第02章 线性表
+void TestLinearList();
+
 // 第10章 内部排序
-void test_inner_sort();
+void TestInnerSort();
