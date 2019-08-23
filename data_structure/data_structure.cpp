@@ -10,6 +10,7 @@ int main(int argc, char* argv[])
 {
 	// TestInnerSort();
 	// TestCExercise();
-	TestLinearList();
+	// TestLinearListSq();
+	TestLinearLinkList();
 	return 0;
 }

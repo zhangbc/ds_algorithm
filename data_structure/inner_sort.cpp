@@ -8,8 +8,6 @@
 using namespace std;
 
 
-#define SIZE 100
-#define MAXSIZE 20    // 一个用作示例的小顺序表的最大长度
 typedef int KeyType;  // 定义关键字，类型为整数类型
 typedef int InfoType; // 定义非关键字，类型为整数类型
 
@@ -685,7 +683,7 @@ void Collect(SLCell *r, int i, ArrType f, ArrType e)
 
 void RadixSort(SLList &L)
 {
-	int i, p;
+	int i;
 	ArrType f, e;
 	for(i = 0; i < L.keynum; i++)  // 将最低位优先依次对各个关键字进行分配和收集
 	{

@@ -26,4 +26,5 @@ void TestCExercise()
 	cout << "==============C语言经典问题汇集演示================\n" << endl;
 	float pi = get_pi();
 	cout << "π的值为：" << pi << endl;
+	cout << endl;
 }

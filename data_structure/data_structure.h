@@ -12,14 +12,22 @@ typedef int Status;
 #define LISTINCREMENT  10   // 线性表存储空间的分配增量
 		
 
-#define MAXSIZE 20         // 一个用作示例的小顺序表的最大长度
-#define MAX_NUM_OF_KEY 10  // 关键字项数的最大值
-#define RADIX 10           // 关键字基数，此时是十进制整数基数
+#define MAXSIZE 1000         // 一个用作示例的小顺序表的最大长度或者链表的最大长度
+#define MAX_NUM_OF_KEY 10    // 关键字项数的最大值
+#define RADIX 10             // 关键字基数，此时是十进制整数基数
 #define MAX_SPACE  10000   
 
 
 // 第02章 线性表
-void TestLinearList();
+typedef int ElemType;
+typedef char C_ElemType;
+
+/* 线性表的顺序结构实现 */
+void TestLinearListSq();
+
+/* 线性表的链式结构实现 */
+void TestLinearLinkList();
+
 
 // 第10章 内部排序
 void TestInnerSort();

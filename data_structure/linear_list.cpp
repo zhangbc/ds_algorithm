@@ -6,13 +6,12 @@
 using namespace std;
 
 
-typedef int ElemType;
 typedef struct
 {
 	ElemType *elem;   // 存储空间基址
 	int length;		  // 当前长度
 	int listsize;	  // 当前分配的存储空间(以sizeof(ElemType)为单位)
-}SeqList;
+}SeqList;			  // 线性表的动态分配顺序存储结构
 
 
 // 算法2.3，顺序线性表初始化
@@ -66,14 +65,7 @@ Status ClearList_Sq(SeqList &L)
 // 判断顺序线性表是否为空
 Status ListEmpty_Sq(SeqList L)
 {
-	if(L.length == 0)
-	{
-		return TRUE;
-	}
-	else
-	{
-		return FALSE;
-	}
+	return L.length == 0 ? TRUE : FALSE;
 }
 
 
@@ -177,7 +169,7 @@ Status compare(ElemType x, ElemType y)
 
 // 算法2.6，顺序线性表查找元素
 /* 在顺序表L中查找第1个值与e满足compare()的元素的位序 */
-Status LocateElem_Sq(SeqList &L, ElemType e, Status (*compare)(ElemType, ElemType))
+Status LocateElem_Sq(SeqList L, ElemType e, Status (*compare)(ElemType, ElemType))
 {
 	int i = 1;      // i的初值为第1个元素的位序
 	ElemType *p;
@@ -355,7 +347,7 @@ void DisplaySeqList()
 
 
 // 测试函数
-void TestLinearList()
+void TestLinearListSq()
 {
 	cout << "==============线性表基本操作及其相关算法演示================\n" << endl;
 	cout << "==============顺序线性表基本操作具体实现实例================\n" << endl; 
@@ -373,6 +365,7 @@ void TestLinearList()
 	ListTraverse_Sq(La, visit);
 	cout << "遍历线性表Lb：";
 	ListTraverse_Sq(Lb, visit);
+
 	cout << "============将所有在线性表Lb中但不在La中的数据元素插入到La中========" << endl;
 	UnionList(La, Lb);
 	cout << "合并后，遍历线性表La：";
@@ -388,4 +381,5 @@ void TestLinearList()
 	MergeList_Sq(La, Lb, Lc);
 	cout << "合并后，遍历顺序线性表Lc：";
 	ListTraverse_Sq(Lc, visit);
+	cout << endl;
 }
