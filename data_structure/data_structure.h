@@ -28,6 +28,8 @@ void TestLinearListSq();
 /* 线性表的链式结构实现 */
 void TestLinearLinkList();
 
+/* 线性表的链式结构实现及其应用 */
+void TestLinearLinkList();
 
 // 第10章 内部排序
 void TestInnerSort();

@@ -29,6 +29,23 @@ typedef struct DuLNode
 }DuLNode, *DuLinkList;            // 线性表的双向链表存储结构
 
 
+typedef struct    // 项的表示，多项式的项作为LinkList的数据元素
+{
+	float coef;      // 系数
+	int expn;        // 指数
+}term, N_ElemType;   // term用于Polynomial的ADT, N_ElemType为PLinkList的数据对象名
+
+
+typedef struct PLNode
+{
+	N_ElemType data;
+	struct PLNode *next;
+}PLNode, *PLinkList; // 线性表的单链表存储结构
+
+
+typedef PLinkList polynomial;// 用带头结点的有序链表表示多项式
+
+
 // 单链表初始化
 /* 构造一个空的线性表L */
 Status InitList_L(LinkList &L)
@@ -513,7 +530,450 @@ Status ListDelete_DuL(DuLinkList &L, int i, ElemType &e)
 }
 
 
-// 算法2.20和算法2.21 分别参见算法2.9和算法2.12
+// 算法2.20和算法2.21，分别参见算法2.9和算法2.12
+
+
+// 算法2.22，抽象数据类型Polynomial的实现
+/* 依据a的指数值<(或=)(或>)b的指数值，分别返回-1,0和1 */
+Status cmp(term a, term b)
+{
+	int result = 0;
+	if(a.expn < b.expn)
+	{
+		result = -1;
+	}
+	else if(a.expn == b.expn)
+	{
+		result = 0;
+	}
+	else
+	{
+		result = 1;
+	}
+
+	return result;
+}
+
+
+/* 初始化 */
+Status InitList_P(PLinkList &L)
+{
+	L = (PLinkList)malloc(sizeof(PLNode));
+	if(!L)
+	{
+		exit(OVERFLOW);
+	}
+	
+	L->data.coef = 0.0;
+	L->data.expn = -1;
+	L->next = NULL;  // 建立一个带头结点的单链表
+	return OK;
+}
+
+
+// 判断链表是否为空
+Status ListEmpty_P(PLinkList L)
+{
+	return L->next == NULL;
+}
+
+
+// 遍历链表，即输出一元多项式
+Status ListTraverse_P(polynomial L)
+{	
+	if(!L->next)
+	{
+		cout << " Empty!" << endl;
+		return ERROR;
+	}
+
+	PLNode *p;
+	p = L->next;
+	while(p)
+	{
+		if(p != L->next && p->data.coef > 0)
+		{
+			cout << "+";
+		}
+		
+		if(p->data.coef != 0 && !(p->data.coef == 1 && p->data.expn != 0))
+		{
+			if(p->data.coef == -1 && p->data.expn != 0)
+			{
+				cout << "-";
+			}
+			else
+			{
+				cout << p->data.coef;
+			}
+		}
+		
+		if(p->data.coef != 0 && p->data.coef != 1 
+			&& p->data.coef != -1 && p->data.expn != 0)
+		{
+			cout << "*";
+		}
+
+		if(p->data.expn == 1)
+		{
+			cout << "x";
+		}
+
+		if(p->data.expn > 0 && p->data.expn != 1)
+		{
+			cout << "x^" << p->data.expn;
+		}
+		
+		if(p->data.expn < 0 && p->data.expn != 1)
+		{
+			cout << "x^(" << p->data.expn << ")";
+		}
+
+		p = p->next;
+	}
+	cout << endl;
+
+	return OK;
+}
+
+
+/* 给当前结点赋值 */
+Status SetCurElem_P(PLNode *pLNode, N_ElemType e)
+{
+	pLNode->data.coef = e.coef;
+	pLNode->data.expn = e.expn;
+	return OK;
+}
+
+
+/* 生成新的结点并赋值 */
+Status MakeNode_P(PLNode *pLNode, N_ElemType e)
+{
+	if(!pLNode)
+	{
+		exit(OVERFLOW);
+	}
+
+	SetCurElem_P(pLNode, e);
+	pLNode->next = NULL;
+	return OK;
+}
+
+
+/* 若有序链表L中存在与e满足判定函数cmp()取值为0的元素，则q指示L中第一个值为e的结点的位置，并返回
+   TRUE，否则q指示第一个与e满足判定函数cmp()取值>0的元素的前驱的位置，并返回FASLE。 */
+Status LocateElem_P(polynomial L, N_ElemType e, int &q, Status(*cmp)(N_ElemType, N_ElemType))
+{
+	PLNode *p;
+	p = L;
+	int result, count = 0;
+	while(L->next)
+	{
+		p = L;
+		L = L->next;
+		count++;
+		result = (*cmp)(L->data, e);
+		if(result == 0)
+		{
+			q = count;
+			return TRUE;
+		}
+
+		if(result == 1)
+		{
+			q = count - 1;
+			return FALSE;
+		}
+		p = L;
+	}
+
+	q = count;
+	return FALSE;
+}
+
+
+/* 按照有序判定函数cmp()的约定，将值为e的结点插入到有序链表L的适当位置上。*/
+Status OrderInsert(polynomial &L, N_ElemType e, Status(*cmp)(N_ElemType, N_ElemType))
+{
+	if(e.coef == 0)
+	{
+		return ERROR;
+	}
+
+	PLNode *p, *q;
+	int pos;
+	q = (PLNode *)malloc(sizeof(PLNode));
+	if(!MakeNode_P(q, e))
+	{
+		return ERROR;
+	}
+	
+	LocateElem_P(L, e, pos, cmp);
+
+	p = L;	
+	while(pos > 0)
+	{
+		p = p->next;
+		pos--;
+	}
+
+	q->next = p->next;
+	p->next = q;
+	return TRUE;
+}
+
+
+/* 输入m项的系数和指数，建立表示一元多项式的有序链表P */
+void CreatePolyn(polynomial &P, int m)
+{
+	InitList_P(P);
+	PLNode *h;
+	int q;
+	h = P;
+	
+	N_ElemType e;
+	e.coef = 0.0;
+	e.expn = -1;
+	SetCurElem_P(h, e);  // 设置头结点的数据元素
+
+	int i, j;
+	for(i = 1; i <=m; i++)  // 依次输入m个非零项
+	{
+		cin >> e.coef >> e.expn;
+		j = LocateElem_P(P, e, q, cmp);
+		if(!j)   // 当前链表中不存在该指数项，插入链表
+		{
+			OrderInsert(P, e, cmp);
+		}
+	}
+}
+
+
+// 算法2.23，一元多项式的基本运算
+/* 多项式加法：Pa = Pa + Pb, 利用两个多项式的结点构成“和多项式”。*/
+void AddPolyn(polynomial &Pa, polynomial &Pb)
+{
+	PLNode *ha, *hb, *qa, *qb;
+	ha = Pa;                    // ha指向Pa的头结点
+	hb = Pb;					// hb指向Pb的头结点
+	qa = ha->next;				// qa指向Pa当前结点
+	qb = hb->next;				// qb指向Pb当前结点
+	
+	N_ElemType a, b, sum;
+	while(qa && qb) // qa和qb非空
+	{
+		a = qa->data;  // a为当前比较元素
+		b = qb->data;  // b为当前比较元素
+		switch(cmp(a, b))
+		{
+		case -1:   // 多项式PA中当前结点的指数值小
+			ha = qa;
+			qa = ha->next;
+			break;
+		case 0:     // 多项式PA和PB中当前结点的指数值相等
+			sum.coef = a.coef + b.coef;
+			if(sum.coef != 0.0)  // 修改多项式PA中当前结点的系数值
+			{
+				sum.expn = a.expn;
+				SetCurElem_P(qa, sum);
+				ha = qa;
+			}
+			else             // 删除多项式PA中当前结点
+			{
+				ha->next = qa->next;
+				free(qa);
+			}
+			
+			hb->next = qb->next;
+			qb = hb->next;
+			qa = ha->next;
+			break;
+		case 1:  // 多项式PB中当前结点的指数值小
+			OrderInsert(ha, qb->data, cmp);
+			hb->next = qb->next;
+			qb = hb->next;
+			qa = ha->next;
+			break;
+		}
+	}
+	
+	if(!ListEmpty_P(Pb)) // 链接Pb中剩余的结点
+	{
+		ha->next = qb;
+	}
+	free(hb);  // 释放Pb的头结点
+}
+
+
+/* 多项式加法：Pc = Pa + Pb, 利用两个多项式的结点构成“和多项式”。*/
+void AddPolynT(polynomial &Pa, polynomial &Pb, polynomial &Pc)
+{
+	InitList_P(Pc);
+	PLNode *qa, *qb;
+	qa = Pa->next;				// qa指向Pa当前结点
+	qb = Pb->next;				// qb指向Pb当前结点
+	
+	N_ElemType a, b, sum;
+	while(qa && qb) // qa和qb非空
+	{
+		a = qa->data;  // a为当前比较元素
+		b = qb->data;  // b为当前比较元素
+		switch(cmp(a, b))
+		{
+		case -1:   // 多项式PA中当前结点的指数值小
+			OrderInsert(Pc, qa->data, cmp);
+			qa = qa->next;
+			break;
+		case 0:     // 多项式PA和PB中当前结点的指数值相等
+			sum.coef = a.coef + b.coef;
+			if(sum.coef != 0.0)  // 修改多项式PA中当前结点的系数值
+			{
+				sum.expn = a.expn;
+				OrderInsert(Pc, sum, cmp);
+			}			
+			qb = qb->next;
+			qa = qa->next;
+			break;
+		case 1:  // 多项式PB中当前结点的指数值小
+			OrderInsert(Pc, qb->data, cmp);
+			qb = qb->next;
+			break;
+		}
+	}
+	
+	while(qa) // 链表Pa中剩余的结点
+	{
+		OrderInsert(Pc, qa->data, cmp);
+		qa = qa->next;
+	}
+
+	while(qb) // 链表Pb中剩余的结点
+	{
+		OrderInsert(Pc, qb->data, cmp);
+		qb = qb->next;
+	}
+}
+
+/* 多项式减法：Pc = Pa - Pb, 利用两个多项式的结点构成“差多项式”。*/
+void SubstractPolynT(polynomial Pa, polynomial Pb, polynomial &Pc)
+{
+	InitList_P(Pc);
+	PLNode *qa, *qb;
+	qa = Pa->next;				// qa指向Pa当前结点
+	qb = Pb->next;				// qb指向Pb当前结点
+	
+	N_ElemType a, b, differ;
+	while(qa && qb) // qa和qb非空
+	{
+		a = qa->data;  // a为当前比较元素
+		b = qb->data;  // b为当前比较元素
+		switch(cmp(a, b))
+		{
+		case -1:   // 多项式PA中当前结点的指数值小
+			OrderInsert(Pc, qa->data, cmp);
+			qa = qa->next;
+			break;
+		case 0:     // 多项式PA和PB中当前结点的指数值相等
+			differ.coef = a.coef - b.coef;
+			if(differ.coef != 0.0)  // 修改多项式PA中当前结点的系数值
+			{
+				differ.expn = a.expn;
+				OrderInsert(Pc, differ, cmp);
+			}			
+			qb = qb->next;
+			qa = qa->next;
+			break;
+		case 1:  // 多项式PB中当前结点的指数值小
+			differ.coef = -(qb->data.coef);
+			differ.expn = qb->data.expn;
+			OrderInsert(Pc, differ, cmp);
+			qb = qb->next;
+			break;
+		}
+	}
+
+	while(qa) // 链表Pa中剩余的结点
+	{
+		OrderInsert(Pc, qa->data, cmp);
+		qa = qa->next;
+	}
+	
+	while(qb) // 链表Pb中剩余的结点
+	{
+		differ.coef = -(qb->data.coef);
+		differ.expn = qb->data.expn;
+		OrderInsert(Pc, differ, cmp);
+		qb = qb->next;
+	}
+}
+
+
+/* 按照有序判定函数cmp()的约定，将值为e的结点合并到有序链表L的适当位置上，
+   如果指数相同，则系数做加法运算并修改L中对应结点的系数，反之作为新结点插入到L中。*/
+Status OrderMergeInsert(polynomial &L, N_ElemType e, Status(*cmp)(N_ElemType, N_ElemType))
+{
+	PLNode *p, *q, *s;
+	int pos;
+	q = (PLNode *)malloc(sizeof(PLNode));
+	s = (PLNode *)malloc(sizeof(PLNode));
+	if(!MakeNode_P(q, e))
+	{
+		return ERROR;
+	}
+	
+	int k = LocateElem_P(L, e, pos, cmp);
+
+	p = L;	
+	while(pos > 1)
+	{
+		p = p->next;
+		pos--;
+	}
+	
+	s = p->next;  // 记录当前结点
+	if (k)  // 若相等，修改L表中对应结点的系数
+	{
+		s->data.coef = s->data.coef + q->data.coef;
+		if(s->data.coef == 0)
+		{
+			p->next = s->next; // 删除结点
+			
+		}
+		else
+		{
+			p->next = s; // 修改结点信息
+		}
+	}
+	else   // 若不相等，则插入新结点 
+	{
+		q->next = p->next;
+		p->next = q;
+	}
+
+	return TRUE;
+}
+
+/* 多项式乘法：Pc = Pa * Pb, 利用两个多项式的结点构成“积多项式”。*/
+void MultiplyPolynT(polynomial Pa, polynomial Pb, polynomial &Pc)
+{
+	InitList_P(Pc);
+	PLNode *qa, *qb;
+	qa = Pa->next;				// qa指向Pa当前结点
+	N_ElemType e;
+
+	while(qa)
+	{	
+		qb = Pb->next;			// qb指向Pb当前结点
+		while(qb)
+		{
+			e.coef = qa->data.coef * qb->data.coef;
+			e.expn = qa->data.expn + qb->data.expn;
+			OrderMergeInsert(Pc, e, cmp);
+			qb = qb->next;
+		}
+		qa = qa->next;
+	}
+}
 
 
 // 单链表基本操作具体实现实例
@@ -551,9 +1011,9 @@ void DisplayLinkList()
 	GetElem_L(L, 5, e);
 	cout << "\n获取表中第5个元素(0表示没有):" << e << endl;
 
-	// cout << "\n创建线性表L中(5个元素)……" << endl;
-	// CreateList_L(L, 5);
-	// ListTraverse_L(L);
+	cout << "\n创建线性表L中(5个元素)……" << endl;
+	CreateList_L(L, 5);
+	ListTraverse_L(L);
 	cout << endl;
 }
 
@@ -616,11 +1076,31 @@ void TestLinearLinkList()
 	ListTraverse_L(Lc);
 	
 	cout << "\n=========实现集合运算(A-B)∪(B-A)========" << endl;
-	// SLinkList space;
-	// UnionDifference(space);
-	// ListTraverse_SL(space);
+	SLinkList space;
+	UnionDifference(space);
+	ListTraverse_SL(space);
 
 	cout << "\n==============双向链表基本操作具体实现实例================\n" << endl; 
 	DisplayDuLinkList();
-	cout << endl;
+
+	cout << "\n==============一元多项式的表示以及相关运算具体实现实例================\n" << endl; 
+	polynomial Pa, Pb, Pc;
+	int m, n;
+	cout << "创建一元多项式Pa和Pb, 请分别输入多项式项数：";
+	cin >> m >> n;
+	CreatePolyn(Pa, m);
+	CreatePolyn(Pb, n);
+	cout << "遍历一元多项式Pa：";
+	ListTraverse_P(Pa);
+	cout << "遍历一元多项式Pb：";
+	ListTraverse_P(Pb);
+	AddPolynT(Pa, Pb, Pc);
+	cout << "Pa+Pb后遍历新的一元多项式Pc：";
+	ListTraverse_P(Pc);
+	SubstractPolynT(Pa, Pb, Pc);
+	cout << "Pa-Pb后遍历新的一元多项式Pc：";
+	ListTraverse_P(Pc);
+	MultiplyPolynT(Pa, Pb, Pc);
+	cout << "Pa*Pb后遍历新的一元多项式Pc：";
+	ListTraverse_P(Pc);
 }
