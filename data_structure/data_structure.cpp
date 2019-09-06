@@ -9,8 +9,9 @@
 int main(int argc, char* argv[])
 {
 	// TestInnerSort();
-	// TestCExercise();
+	TestCExercise();
 	// TestLinearListSq();
-	TestLinearLinkList();
+	// TestLinearLinkList();
+	// TestStack();
 	return 0;
 }

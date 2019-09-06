@@ -16,7 +16,7 @@ typedef struct LNode
 
 typedef struct
 {
-	C_ElemType data;
+	CElemType data;
 	int cur;
 }component, SLinkList[MAXSIZE];   // 线性表的静态单链表存储结构
 
@@ -280,7 +280,7 @@ void MergeList_L(LinkList &La, LinkList &Lb, LinkList &Lc)
 // 算法2.13，静态单链表查找元素
 /* 在静态单链线性表L中查找第1个值为e的元素，
 	若找到则返回其位序，否则返回0 */
-int LocateElem_SL(SLinkList S, C_ElemType e)
+int LocateElem_SL(SLinkList S, CElemType e)
 {
 	int i = S[0].cur;            // i指示表中第一个结点
 	while(i && S[i].data != e)   // 在表中顺链查找
@@ -354,7 +354,7 @@ void UnionDifference(SLinkList &space)
 	int S = Malloc_SL(space);
     r = S;   // r指向S的当前最后结点
 	int m, n, j;
-	C_ElemType e;
+	CElemType e;
 	cout << "依次输入A和B的元素个数: ";
 	cin >> m >> n;  // 输入A和B的元素个数
 	

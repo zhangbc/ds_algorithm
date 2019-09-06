@@ -18,9 +18,15 @@ typedef int Status;
 #define MAX_SPACE  10000   
 
 
+#define STACK_INIT_SIZE 100   // 栈的存储空间初始分配量
+#define STACKINCREMENT  10    // 栈的存储空间的分配增量
+
+
 // 第02章 线性表
 typedef int ElemType;
-typedef char C_ElemType;
+typedef char CElemType;
+typedef int MazeType;
+
 
 /* 线性表的顺序结构实现 */
 void TestLinearListSq();
@@ -30,6 +36,14 @@ void TestLinearLinkList();
 
 /* 线性表的链式结构实现及其应用 */
 void TestLinearLinkList();
+
+
+// 第03章 栈和队列
+typedef char SElemType;
+typedef double DSElemType;
+/* 栈的顺序结构实现 */
+void TestStack();
+
 
 // 第10章 内部排序
 void TestInnerSort();
