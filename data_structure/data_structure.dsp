@@ -105,6 +105,10 @@ SOURCE=.\linear_list.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\queue.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\stack.cpp
 # End Source File
 # Begin Source File
