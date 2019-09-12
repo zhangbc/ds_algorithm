@@ -116,6 +116,10 @@ SOURCE=.\stack.cpp
 SOURCE=.\StdAfx.cpp
 # ADD CPP /Yc"stdafx.h"
 # End Source File
+# Begin Source File
+
+SOURCE=.\strings.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

@@ -14,7 +14,7 @@ void Print()
 	cout << "启动程序编号说明：\n" << endl;
 	cout << "1：内部排序\t\t2：C经典问题\t\t3：顺序线性表\n";
 	cout << "4：链式线性表\t\t5：顺序栈\t\t6：队列\n";
-	cout << "0：退出\n";
+	cout << "7：串\t\t0：退出\n";
 }
 
 
@@ -23,7 +23,7 @@ void SwitchProgram()
 	int sno;
 	while(true)
 	{
-		cout << "\n请输入想要启动的程序编号(1~6)：";
+		cout << "\n请输入想要启动的程序编号(1~7)：";
 		cin >> sno;
 		if(sno == 0)
 		{
@@ -49,6 +49,9 @@ void SwitchProgram()
 			break;
 		case 6:
 			TestQueue();
+			break;
+		case 7:
+			TestStrings();
 			break;
 		default:
 			cout << "输入有误, 请重新输入!  ";

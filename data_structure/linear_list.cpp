@@ -301,6 +301,7 @@ void MergeList_Sq(SeqList La, SeqList Lb, SeqList &Lc)
 	}
 }
 
+
 // 顺序线性表基本操作具体实现实例
 void DisplaySeqList()
 {
